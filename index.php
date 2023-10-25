@@ -87,8 +87,10 @@ function updateChart(count) {
 	for (var i = 0; i < dps.length; i++) {
 		dps[i] = {label: dps[i].country_name , y: dps[i].population, color: dps[i].color};
 	}
-	chart.options.data[0].dataPoints = dps; 
+	chart.options.data[0].dataPoints = dps;
+	//sort show data in bar 
     chart.options.data[0].dataPoints.sort(DataPopularDesc);
+	//set text in total year
 	$('#text_year').html(data_popular[count].year);
 	$('#population_all').html(data_popular[count].population_all);
 	chart.render();

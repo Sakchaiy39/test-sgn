@@ -28,6 +28,7 @@ foreach($data AS $key => $value){
         $array_data[$value[1]][$key]['country_name'] = $value[0];
         $array_data[$value[1]][$key]['population'] = intval($value[2]);
         $array_data[$value[1]][$key]['color'] = "#80B7A2";
+        //set new key
         $array_data[$value[1]] = array_values($array_data[$value[1]]); 
     }
 }
@@ -41,11 +42,11 @@ foreach($array_data AS $key => $value_year){
     }
     $array_popular[$key]['population_all'] = number_format($total_popular);
 
+    //sort data and limit 10 DESC
     usort($value_year, function($a, $b) {
         return $b["population"] - $a["population"];
     });
     $top10_limit = array_slice($value_year, 0, 10);
-    
     $array_popular[$key]['data'] = $top10_limit;
 }
 
