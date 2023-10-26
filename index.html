@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Page Title</title>
+<title>Test SGN</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -50,16 +50,71 @@ window.onload = function () {
 let count = 0;
 let data_popular = [];
 
-//get data excel
-$.ajax({
-    url: 'csv.php',
-    method: 'GET',
-    async: false,
-    success: function (res) {
-        const json = JSON.parse(res);
-		data_popular = json;
-    }	
- });
+fetch('population-and-demography.csv')
+    .then((response) => response.text())
+    .then((data) => {
+        const array = data.split('\n').map((row) => row.split(','));
+		//set data
+		let array_popular = [];
+		let array_data = [];
+		const check_no_country = [
+			'World',
+			'Asia (UN)',
+			'Less developed regions',
+			'Less developed regions, excluding least developed countries',
+			'Less developed regions, excluding China',
+			'Low-income countries',
+			'Upper-middle-income countries',
+			'Lower-middle-income countries',
+			'More developed regions',
+			'High-income countries',
+			'Least developed countries',
+			'Africa (UN)',
+			'Europe (UN)',
+			'Latin America and the Caribbean (UN)',
+			'Land-locked developing countries (LLDC)',
+			'Northern America (UN)',
+			'United States',
+			'United Kingdom'
+		];
+
+		//set data
+		array.forEach((value, key) => {
+			if (key > 0 && !check_no_country.includes(value[0])) {
+				//group data key year
+				if (!array_data[value[1]]) {
+					array_data[value[1]] = [];
+				}else{
+					array_data[value[1]].push({
+						country_name: value[0],
+						population: parseInt(value[2]),
+						color: "#80B7A2"
+					});
+				}
+			}
+		});
+
+		// set format data for chart
+		for(const [key, value_year] of Object.entries(array_data)){
+			// get sum total population
+    		let total_popular = 0;
+			value_year.forEach((value_popular, key_popular) => {
+				total_popular += value_popular['population'];
+			});
+			//sort population desc and limit 10
+			value_year.sort((a, b) => b.population - a.population);
+			let top10_limit = value_year.slice(0, 10);
+
+			array_popular[key] = {year : key, population_all : total_popular.toLocaleString(), data: top10_limit }
+		}
+		//convert key year to index
+		data_popular = Object.values(array_popular);
+		data_popular.splice(-2);
+
+		//
+		updateChart(count);
+    }
+)
 
 //sort
 function DataPopularDesc(data1, data2) {
@@ -87,15 +142,13 @@ function updateChart(count) {
 	for (var i = 0; i < dps.length; i++) {
 		dps[i] = {label: dps[i].country_name , y: dps[i].population, color: dps[i].color};
 	}
-	chart.options.data[0].dataPoints = dps;
-	//sort show data in bar 
+	chart.options.data[0].dataPoints = dps; 
     chart.options.data[0].dataPoints.sort(DataPopularDesc);
-	//set text in total year
 	$('#text_year').html(data_popular[count].year);
 	$('#population_all').html(data_popular[count].population_all);
 	chart.render();
 };
-updateChart(count);
+// updateChart(count);
 
 //set time update data
 setInterval(function() {
